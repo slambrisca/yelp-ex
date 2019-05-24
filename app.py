@@ -1,5 +1,6 @@
 import csv
 import json
+import os
 import random
 import sys
 import tarfile
@@ -9,18 +10,21 @@ from datetime import datetime, timedelta
 def main():
     check_arguments()
     tarfile_path = get_filepath()
+
+    dir = os.path.dirname(tarfile_path)
+
     with tarfile.open(tarfile_path) as tar:
         user_ids = set()
         with tar.extractfile("user.json") as file:
-            with open("/yelp-data/user.csv", "w") as user_file:
+            with open(f"{dir}/user.csv", "w") as user_file:
                 sample_file_to_csv(file, user_file, 1, user_ids)
 
         with tar.extractfile("review.json") as file:
-            with open("/yelp-data/review.csv", "w") as review_file:
+            with open(f"{dir}/review.csv", "w") as review_file:
                 filter_reviews_by_user_id(file, review_file, user_ids)
 
         with open("review.csv") as sample_review_file:
-            with open("/yelp-data/noreviewers.csv", "w") as recent_reviewers_file:
+            with open(f"{dir}/noreviewers.csv", "w") as recent_reviewers_file:
                 ayearago = datetime.now() - timedelta(days=365)
                 filter_users_with_recent_reviews(sample_review_file, recent_reviewers_file, ayearago, user_ids)
 
